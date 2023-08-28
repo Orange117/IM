@@ -7,7 +7,7 @@ import (
 )
 
 type UserBasic struct {
-	Identity  string `bson:"_id"`
+	Identity  string `bson:"identity"`
 	Account   string `bson:"account"`
 	Password  string `bson:"password"`
 	Nickname  string `bson:"nickname"`
