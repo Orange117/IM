@@ -1,10 +1,14 @@
 package helper
 
 import (
+	"IM/define"
 	"crypto/md5"
+	"crypto/tls"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/jordan-wright/email"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"net/smtp"
 )
 
 type UserClaims struct {
@@ -57,4 +61,16 @@ func AnalyseToken(tokenString string) (*UserClaims, error) {
 		return nil, fmt.Errorf("analyse Token Error:%v", err)
 	}
 	return userClaim, nil
+}
+
+// SendCode 发送验证码
+func SendCode(toUserEmail, code string) error {
+	e := email.NewEmail()
+	e.From = "Get <1639601246@qq.com>"
+	e.To = []string{toUserEmail}
+	e.Subject = "验证码已发送，请查收"
+	e.HTML = []byte("您的验证码：<b>" + code + "</b>")
+	return e.SendWithTLS("smtp.qq.com:465",
+		smtp.PlainAuth("", "1639601246@qq.com", define.MailPassword, "smtp.qq.com"),
+		&tls.Config{InsecureSkipVerify: true, ServerName: "smtp.qq.com"})
 }

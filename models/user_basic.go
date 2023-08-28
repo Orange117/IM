@@ -21,6 +21,7 @@ type UserBasic struct {
 func (UserBasic) CollectionName() string {
 	return "user_basic"
 }
+
 func GetUserBasicByAccountPassword(account, password string) (*UserBasic, error) {
 	ub := new(UserBasic)
 	err := Mongo.Collection(UserBasic{}.CollectionName()).
@@ -35,4 +36,9 @@ func GetUserBasicByIdentity(identity primitive.ObjectID) (*UserBasic, error) {
 		FindOne(context.Background(), bson.D{{"_id", identity}}).
 		Decode(ub)
 	return ub, err
+}
+
+func GetUserBasicCountByEmail(email string) (int64, error) {
+	return Mongo.Collection(UserBasic{}.CollectionName()).
+		CountDocuments(context.Background(), bson.D{{"email", email}})
 }
