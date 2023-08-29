@@ -8,6 +8,9 @@ import (
 
 func Router() *gin.Engine {
 	r := gin.Default()
+	// 用户注册
+	r.POST("/register", service.Register)
+
 	// 用户登录
 	r.POST("/login", service.Login)
 	// 发送验证码

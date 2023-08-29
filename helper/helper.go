@@ -3,11 +3,14 @@ package helper
 import (
 	"IM/define"
 	"crypto/md5"
-	"crypto/tls"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/jordan-wright/email"
+	"math/rand"
 	"net/smtp"
+	"strconv"
+	"time"
 )
 
 type UserClaims struct {
@@ -63,7 +66,23 @@ func SendCode(toUserEmail, code string) error {
 	e.To = []string{toUserEmail}
 	e.Subject = "验证码已发送，请查收"
 	e.HTML = []byte("您的验证码：<b>" + code + "</b>")
-	return e.SendWithTLS("smtp.qq.com:465",
-		smtp.PlainAuth("", "1639601246@qq.com", define.MailPassword, "smtp.qq.com"),
-		&tls.Config{InsecureSkipVerify: true, ServerName: "smtp.qq.com"})
+	return e.Send("smtp.qq.com:587",
+		smtp.PlainAuth("", "1639601246@qq.com", define.MailPassword, "smtp.qq.com"))
+
+}
+
+// GetCode 生成验证码
+func GetCode() string {
+	rand.Seed(time.Now().UnixNano())
+	res := ""
+	for i := 0; i < 6; i++ {
+		res += strconv.Itoa(rand.Intn(10))
+	}
+	return res
+}
+
+// GetUUID 生成唯一码
+func GetUUID() string {
+	u := uuid.New()
+	return fmt.Sprintf("%x", u)
 }
