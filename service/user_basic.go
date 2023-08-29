@@ -68,6 +68,43 @@ func UserDetail(c *gin.Context) {
 	//})
 }
 
+func UserQuery(c *gin.Context) {
+	account := c.Query("account")
+	if account == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "参数不正确",
+		})
+		return
+	}
+	userBasic, err := models.GetUserBasicByAccount(account)
+	if err != nil {
+		log.Printf("[DB ERROR]:%v\n", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "数据查询异常",
+		})
+		return
+	}
+	uc := c.MustGet("user_claims").(*helper.UserClaims)
+	data := UserQueryResult{
+		Nickname: userBasic.Nickname,
+		Sex:      userBasic.Sex,
+		Email:    userBasic.Email,
+		Avatar:   userBasic.Avatar,
+		IsFriend: false,
+	}
+	if models.JudgeUserIsFriend(userBasic.Identity, uc.Identity) {
+		data.IsFriend = true
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "数据加载成功",
+		"data": data,
+	})
+
+}
+
 func SendCode(c *gin.Context) {
 	email := c.PostForm("email")
 	if email == "" {
@@ -188,4 +225,12 @@ func Register(c *gin.Context) {
 			"token": token,
 		},
 	})
+}
+
+type UserQueryResult struct {
+	Nickname string `json:"nickname"`
+	Sex      int    `bson:"sex"`
+	Email    string `bson:"email"`
+	Avatar   string `bson:"avatar"`
+	IsFriend bool   `json:"is_friend"`
 }
