@@ -5,17 +5,15 @@ import (
 	"crypto/md5"
 	"crypto/tls"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/jordan-wright/email"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/smtp"
 )
 
 type UserClaims struct {
-	//Identity string `json:"identity"`
-	Identity primitive.ObjectID `json:"identity"`
-	Email    string             `json:"email"`
-	jwt.StandardClaims
+	Identity string `json:"identity"`
+	Email    string `json:"email"`
+	jwt.RegisteredClaims
 }
 
 // GetMd5
@@ -29,15 +27,10 @@ var myKey = []byte("im")
 // GenerateToken
 // 生成 token
 func GenerateToken(identity, email string) (string, error) {
-	objectID, err := primitive.ObjectIDFromHex(identity)
-	//fmt.Println(objectID)
-	if err != nil {
-		return "", err
-	}
 	UserClaim := &UserClaims{
-		Identity:       objectID,
-		Email:          email,
-		StandardClaims: jwt.StandardClaims{},
+		Identity:         identity,
+		Email:            email,
+		RegisteredClaims: jwt.RegisteredClaims{},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaim)
 	tokenString, err := token.SignedString(myKey)
